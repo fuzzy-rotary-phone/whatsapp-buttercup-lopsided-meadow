@@ -12,17 +12,12 @@
 // and save it as environment variable into the .env file)
 const token = process.env.WHATSAPP_TOKEN;
 
+// OpenAI configuration setup
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
-
-const completion = await openai.createCompletion({
-  model: "text-davinci-003",
-  prompt: "Act like a restaurant order taking bot",
-});
-console.log(completion.data.choices[0].text);
 
 // Imports dependencies and set up http server
 const request = require("request"),
@@ -35,7 +30,7 @@ const request = require("request"),
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
 
 // Accepts POST requests at /webhook endpoint
-app.post("/webhook", (req, res) => {
+app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
 
@@ -55,6 +50,13 @@ app.post("/webhook", (req, res) => {
         req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
+
+      const completion = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: "Act like a restaurant order taking bot and just reply with the appropriate response. Customer says, '" + msg_body + "'",
+      });
+      console.log(completion.data.choices[0].text);
+    
       axios({
         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
         url:
@@ -65,7 +67,7 @@ app.post("/webhook", (req, res) => {
         data: {
           messaging_product: "whatsapp",
           to: from,
-          text: { body: "Checkout our menu here - http://chillpanda.in/?where=nostrocafe"},
+          text: { body: completion.data.choices[0].text},
         },
         headers: { "Content-Type": "application/json" },
       });
