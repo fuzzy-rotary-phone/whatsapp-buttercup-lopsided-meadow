@@ -53,7 +53,7 @@ app.post("/webhook", (req, res) => {
         data: {
           messaging_product: "whatsapp",
           to: from,
-          text: { body: "Checkout our menu at : chillpanda.us"},
+          text: { body: "Checkout our menu here - http://chillpanda.in/?where=nostrocafe"},
         },
         headers: { "Content-Type": "application/json" },
       });
