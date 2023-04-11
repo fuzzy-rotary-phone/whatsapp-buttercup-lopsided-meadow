@@ -12,6 +12,18 @@
 // and save it as environment variable into the .env file)
 const token = process.env.WHATSAPP_TOKEN;
 
+const { Configuration, OpenAIApi } = require("openai");
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+const completion = await openai.createCompletion({
+  model: "text-davinci-003",
+  prompt: "Act like a restaurant order taking bot",
+});
+console.log(completion.data.choices[0].text);
+
 // Imports dependencies and set up http server
 const request = require("request"),
   express = require("express"),
